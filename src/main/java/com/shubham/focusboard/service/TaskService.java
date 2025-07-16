@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.shubham.focusboard.dto.TaskDto;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.exception.ReqProcessingException;
 
@@ -14,7 +15,7 @@ public interface TaskService {
 
   public Boolean deleteTaskOrActivateTask(Long id, String isActive)throws ReqProcessingException;
 
-  public Task updateTask(Long id, Task updatedTask)throws ReqProcessingException;
+  public Task updateTask(TaskDto updatedTask)throws ReqProcessingException;
 
   public List<Task> getAllTasks()throws ReqProcessingException;
 

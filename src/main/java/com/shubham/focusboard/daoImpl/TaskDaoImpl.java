@@ -37,13 +37,13 @@ public class TaskDaoImpl implements TaskDao{
 	@Override
 	public List<Task> findAll() {
 		// TODO Auto-generated method stub
-		return null;
+		return taskRepository.findAll();
 	}
 
 	@Override
 	public Optional<Task> findById(Long id) {
 		// TODO Auto-generated method stub
-		return Optional.empty();
+		return taskRepository.findById(id);
 	}
 
 	@Override

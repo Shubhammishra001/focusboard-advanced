@@ -74,4 +74,16 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+	@Override
+	public User findUserByUserId(Long userId) throws ReqProcessingException {
+        try {
+            logger.info("Finding user by userId: {}", userId);
+            return userRepository.findById(userId)
+                    .orElseThrow(() -> new ReqProcessingException("User not found with userId: " + userId));
+        } catch (Exception e) {
+            logger.error("Error in findUserByUserId", e);
+            throw new ReqProcessingException("Error in findUserByUserId", e);
+        }
+    }
+
 }

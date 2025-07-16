@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 
+import com.shubham.focusboard.dto.TaskDto;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.exception.ReqProcessingException;
@@ -87,7 +88,7 @@ public class TaskController {
 	        try {
 	            List<Task> tasks = taskService.getAllTasks();
 	            if(Objects.nonNull(tasks)) {
-	            	return ResponseEntity.ok(Collections.emptyList());
+	            	return ResponseEntity.ok(tasks);
 	            }
 	            return ResponseEntity.badRequest().body(new Task());
 	        } catch (Exception e) {
@@ -96,10 +97,10 @@ public class TaskController {
 	        }
 	    }
 	   
-	    @PutMapping("/update/{id}")
-	    public ResponseEntity<?> updateTask(@PathVariable Long id,@RequestBody Task updatedTask)throws ReqProcessingException {
+	    @PutMapping("/updateTask")
+	    public ResponseEntity<?> updateTask(@RequestBody TaskDto updatedTask)throws ReqProcessingException {
 	        try {
-	            Task task = taskService.updateTask(id, updatedTask);
+	            Task task = taskService.updateTask(updatedTask);
 	            if(Objects.nonNull(task) && task.getId()!=null) {
 	            	return ResponseEntity.ok(task);
 	            }

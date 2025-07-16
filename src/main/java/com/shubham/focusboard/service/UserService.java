@@ -10,5 +10,6 @@ public interface UserService {
 	    User registerUser(User user) throws ReqProcessingException;
 	    User authenticateUser(String loginId, String password) throws ReqProcessingException;
 	    User findUserByLoginId(String loginId) throws ReqProcessingException;
+		User findUserByUserId(Long userId)throws ReqProcessingException;
 
 }
