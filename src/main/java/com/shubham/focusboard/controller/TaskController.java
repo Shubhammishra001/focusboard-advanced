@@ -70,12 +70,21 @@ public class TaskController {
 	    }
 	  //get Task By Id
 	   @GetMapping("/{id}")
-	   public ResponseEntity<?> getTaskById(@PathVariable Long id)throws ReqProcessingException{
+	   public ResponseEntity<?> getTaskById(@RequestParam String loginId,@PathVariable Long id)throws ReqProcessingException{
 		   try {
-			   Task task=taskService.getTaskById(id);
-			   if(Objects.nonNull(task)) {
-				   return ResponseEntity.ok(task);
-			   }
+			   logger.info("API: getTaskById with loginId ",loginId);
+			     if(loginId!=null) {
+			    	 User user=userService.findUserByLoginId(loginId);
+			    	 if(Objects.nonNull(user)) {
+			    		 String tenantId=user.getTenantId();
+			    		 if(tenantId!=null) {
+						   Task task=taskService.getTaskById(id);
+						   if(Objects.nonNull(task)) {
+						   return ResponseEntity.ok(task);
+						   }
+			    		 }
+			    	 }
+			     }
 			   return ResponseEntity.badRequest().body(new Task());
 		   }catch(Exception e) {
 			   logger.error(" Error fetching task ",e);
@@ -84,12 +93,21 @@ public class TaskController {
 	   }
 	   
 	    @GetMapping("/all")
-	    public ResponseEntity<?> getAllTasks() throws ReqProcessingException {
-	        try {
-	            List<Task> tasks = taskService.getAllTasks();
-	            if(Objects.nonNull(tasks)) {
-	            	return ResponseEntity.ok(tasks);
-	            }
+	    public ResponseEntity<?> getAllTasks(@RequestParam String loginId) throws ReqProcessingException {
+	        try { 
+				   logger.info("API: get all tasks with loginId ",loginId);
+				     if(loginId!=null) {
+				    	 User user=userService.findUserByLoginId(loginId);
+				    	 if(Objects.nonNull(user)) {
+				    		 String tenantId=user.getTenantId();
+				    		 if(tenantId!=null) {
+					            List<Task> tasks = taskService.getAllTasks();
+					            if(Objects.nonNull(tasks)) {
+					            	return ResponseEntity.ok(tasks);
+					            }
+				    		 }
+				    	 }
+				     }
 	            return ResponseEntity.badRequest().body(new Task());
 	        } catch (Exception e) {
 	            logger.error("Error fetching tasks", e);
@@ -98,12 +116,21 @@ public class TaskController {
 	    }
 	   
 	    @PutMapping("/updateTask")
-	    public ResponseEntity<?> updateTask(@RequestBody TaskDto updatedTask)throws ReqProcessingException {
+	    public ResponseEntity<?> updateTask(@RequestParam String loginId,@RequestBody TaskDto updatedTask)throws ReqProcessingException {
 	        try {
-	            Task task = taskService.updateTask(updatedTask);
-	            if(Objects.nonNull(task) && task.getId()!=null) {
-	            	return ResponseEntity.ok(task);
-	            }
+				   logger.info("API: update task with loginId ",loginId);
+				     if(loginId!=null) {
+				    	 User user=userService.findUserByLoginId(loginId);
+				    	 if(Objects.nonNull(user)) {
+				    		 String tenantId=user.getTenantId();
+				    		 if(tenantId!=null) {
+					            Task task = taskService.updateTask(updatedTask);
+						            if(Objects.nonNull(task) && task.getId()!=null) {
+						            	return ResponseEntity.ok(task);
+					            }
+				            }
+				    	 }
+				     }
 	            return ResponseEntity.badRequest().body(new Task());
 	        } catch (Exception e) {
 	            logger.error("Error updating task", e);
@@ -112,12 +139,21 @@ public class TaskController {
 	    }
 
 	    @DeleteMapping("/deactivate/{id}")
-	    public ResponseEntity<?> deleteTask(@PathVariable Long id)throws ReqProcessingException {
+	    public ResponseEntity<?> deleteTask(@RequestParam String loginId,@PathVariable Long id)throws ReqProcessingException {
 	        try {
-	            if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.FALSE))){
-	            	return ResponseEntity.ok("Task deleted successfully");
-	            }
-	            return ResponseEntity.ok("Task deleted failed");
+				   logger.info("API: deactivate with loginId ",loginId);
+				     if(loginId!=null) {
+				    	 User user=userService.findUserByLoginId(loginId);
+				    	 if(Objects.nonNull(user)) {
+				    		 String tenantId=user.getTenantId();
+				    		 if(tenantId!=null) {
+				    			 if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.FALSE))){
+				    				 return ResponseEntity.ok("Task deleted successfully");
+				    				 }
+				    			 }
+				    		 }
+				    	  }
+				     return ResponseEntity.ok("Task deleted failed");
 	        } catch (Exception e) {
 	            logger.error("Error deleting task", e);
 	            return ResponseEntity.badRequest().body(e.getMessage());
@@ -125,18 +161,27 @@ public class TaskController {
 	    }
 
 	    @DeleteMapping("/activate/{id}")
-	    public ResponseEntity<?> activateTask(@PathVariable Long id)throws ReqProcessingException {
+	    public ResponseEntity<?> activateTask(@RequestParam String loginId,@PathVariable Long id)throws ReqProcessingException {
 	        try {
-	            if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.TRUE))){
-	            	return ResponseEntity.ok("Task deleted successfully");
-	            }
-	            return ResponseEntity.ok("Task activate  Failed");
-	        } catch (Exception e) {
-	            logger.error("Error activate task", e);
-	            return ResponseEntity.badRequest().body(e.getMessage());
+				   logger.info("API: activate task with loginId ",loginId);
+				     if(loginId!=null) {
+				    	 User user=userService.findUserByLoginId(loginId);
+				    	 if(Objects.nonNull(user)) {
+				    		 String tenantId=user.getTenantId();
+				    		 if(tenantId!=null) {
+					            if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.TRUE))){
+				            	return ResponseEntity.ok("Task deleted successfully");
+				            	}
+					            }
+				    		 }
+				    	 }
+				     return ResponseEntity.ok("Task activate  Failed");
+				     } catch (Exception e) {
+				    	 logger.error("Error activate task", e);
+				    	 return ResponseEntity.badRequest().body(e.getMessage());
+				    	 }
 	        }
 	    }
-}
 
 
 

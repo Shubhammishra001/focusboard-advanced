@@ -95,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
 					task.setStatus(updatedTask.getStatus());
 					task.setTenantId(user.getTenantId());
 					task.setTitle(updatedTask.getTitle());
-					task.setUser(null);
+					task.setUser(user);
 					Task savedTask=taskDao.Save(task);
 					if(Objects.nonNull(savedTask)&& savedTask.getId()!=null){
 						return savedTask;
@@ -113,7 +113,6 @@ public class TaskServiceImpl implements TaskService {
 		try {
 				List<Task> taskList=taskDao.findAll();
 				logger.warn(" taskList ",taskList);
-				System.err.println(" taskList data "+taskList);
 				if(Objects.nonNull(taskList)) {
 					return taskList;
 				}
