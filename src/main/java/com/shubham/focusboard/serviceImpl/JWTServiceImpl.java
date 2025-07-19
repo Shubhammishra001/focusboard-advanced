@@ -7,13 +7,13 @@ import java.sql.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.service.JWTService;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -45,8 +45,8 @@ public class JWTServiceImpl implements JWTService{
 
     @Override
     public String generateToken(User user) {
-        return Jwts.builder()
-                .setSubject(user.getLoginId())
+        return Jwts.builder().claim("loginId", user.getLoginId())
+                .claim("role", user.getRole().name()).setSubject(user.getUsername())
                 .setIssuedAt(new Date(0))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -60,9 +60,18 @@ public class JWTServiceImpl implements JWTService{
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
+                .get("loginId", String.class);  // ✅ FIXED: read claim, not subject
+    }
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                   .setSigningKey(SECRET.getBytes()) // secret must be a byte array
+                   .build()
+                   .parseClaimsJws(token)
+                   .getBody();
     }
 
+
+    
     @Override
     public boolean validateToken(String token, User user) {
         try {

@@ -1,12 +1,13 @@
 package com.shubham.focusboard.controller;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.ResponseEntity;
 
 import com.shubham.focusboard.dto.TaskDto;
 import com.shubham.focusboard.enties.Task;
@@ -42,10 +42,14 @@ public class TaskController {
   	    private SecurityUtil securityUtil;
 
     	
-    	
+    	@PreAuthorize("hasRole('USER')")
 	   @PostMapping("/create")
-	    public ResponseEntity<?> createTask(@RequestParam String loginId,@RequestBody Task taskReq)throws ReqProcessingException {
-		   try {logger.info("API: createTask with loginId ",loginId);
+	    public ResponseEntity<?> createTask(@RequestBody Task taskReq)throws ReqProcessingException {
+		   try {logger.info("API: createTask with loginId ");
+	    	User loggedInUser = securityUtil.getLoggedInUser();
+	    	String loginId = loggedInUser.getLoginId();
+	    	//String tenantId = loggedInUser.getTenantId();
+
 			     if(loginId!=null) {
 			    	 User user=userService.findUserByLoginId(loginId);
 			    	 if(Objects.nonNull(user)) {
@@ -69,14 +73,20 @@ public class TaskController {
 		   return ResponseEntity.internalServerError().build();
 	    }
 	  //get Task By Id
+    	//@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    	@PreAuthorize("hasRole('ADMIN') or authentication.principal.loginId == #loginId")
 	   @GetMapping("/{id}")
-	   public ResponseEntity<?> getTaskById(@RequestParam String loginId,@PathVariable Long id)throws ReqProcessingException{
+	   public ResponseEntity<?> getTaskById(@PathVariable Long id)throws ReqProcessingException{
 		   try {
+		    	User loggedInUser = securityUtil.getLoggedInUser();
+		    	String loginId = loggedInUser.getLoginId();
+		    	String tenantId = loggedInUser.getTenantId();
+
 			   logger.info("API: getTaskById with loginId ",loginId);
 			     if(loginId!=null) {
 			    	 User user=userService.findUserByLoginId(loginId);
 			    	 if(Objects.nonNull(user)) {
-			    		 String tenantId=user.getTenantId();
+			    		  tenantId=user.getTenantId();
 			    		 if(tenantId!=null) {
 						   Task task=taskService.getTaskById(id);
 						   if(Objects.nonNull(task)) {
@@ -91,15 +101,20 @@ public class TaskController {
 			   return ResponseEntity.badRequest().body(e.getStackTrace());
 		   }
 	   }
-	   
+    	
+    	@PreAuthorize("hasRole('ADMIN')")
 	    @GetMapping("/all")
-	    public ResponseEntity<?> getAllTasks(@RequestParam String loginId) throws ReqProcessingException {
+	    public ResponseEntity<?> getAllTasks() throws ReqProcessingException {
 	        try { 
+	        	User loggedInUser = securityUtil.getLoggedInUser();
+	        	String loginId = loggedInUser.getLoginId();
+	        	String tenantId = loggedInUser.getTenantId();
+
 				   logger.info("API: get all tasks with loginId ",loginId);
-				     if(loginId!=null) {
+			   if(loginId!=null) {
 				    	 User user=userService.findUserByLoginId(loginId);
 				    	 if(Objects.nonNull(user)) {
-				    		 String tenantId=user.getTenantId();
+				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
 					            List<Task> tasks = taskService.getAllTasks();
 					            if(Objects.nonNull(tasks)) {
@@ -115,14 +130,20 @@ public class TaskController {
 	        }
 	    }
 	   
+    	@PreAuthorize("hasRole('USER')")
 	    @PutMapping("/updateTask")
-	    public ResponseEntity<?> updateTask(@RequestParam String loginId,@RequestBody TaskDto updatedTask)throws ReqProcessingException {
+	    public ResponseEntity<?> updateTask(@RequestBody TaskDto updatedTask)throws ReqProcessingException {
 	        try {
+	        	User loggedInUser = securityUtil.getLoggedInUser();
+	        	String loginId = loggedInUser.getLoginId();
+	        	String tenantId = loggedInUser.getTenantId();
+
 				   logger.info("API: update task with loginId ",loginId);
-				     if(loginId!=null) {
+
+				   if(loginId!=null) {
 				    	 User user=userService.findUserByLoginId(loginId);
 				    	 if(Objects.nonNull(user)) {
-				    		 String tenantId=user.getTenantId();
+				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
 					            Task task = taskService.updateTask(updatedTask);
 						            if(Objects.nonNull(task) && task.getId()!=null) {
@@ -138,14 +159,19 @@ public class TaskController {
 	        }
 	    }
 
+    	@PreAuthorize("hasRole('USER')")
 	    @DeleteMapping("/deactivate/{id}")
-	    public ResponseEntity<?> deleteTask(@RequestParam String loginId,@PathVariable Long id)throws ReqProcessingException {
+	    public ResponseEntity<?> deleteTask(@PathVariable Long id)throws ReqProcessingException {
 	        try {
+	        	User loggedInUser = securityUtil.getLoggedInUser();
+	        	String loginId = loggedInUser.getLoginId();
+	        	String tenantId = loggedInUser.getTenantId();
+
 				   logger.info("API: deactivate with loginId ",loginId);
 				     if(loginId!=null) {
 				    	 User user=userService.findUserByLoginId(loginId);
 				    	 if(Objects.nonNull(user)) {
-				    		 String tenantId=user.getTenantId();
+				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
 				    			 if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.FALSE))){
 				    				 return ResponseEntity.ok("Task deleted successfully");
@@ -160,14 +186,19 @@ public class TaskController {
 	        }
 	    }
 
+    	@PreAuthorize("hasRole('USER')")
 	    @DeleteMapping("/activate/{id}")
-	    public ResponseEntity<?> activateTask(@RequestParam String loginId,@PathVariable Long id)throws ReqProcessingException {
+	    public ResponseEntity<?> activateTask(@PathVariable Long id)throws ReqProcessingException {
 	        try {
+	        	User loggedInUser = securityUtil.getLoggedInUser();
+	        	String loginId = loggedInUser.getLoginId();
+	        	String tenantId = loggedInUser.getTenantId();
+
 				   logger.info("API: activate task with loginId ",loginId);
 				     if(loginId!=null) {
 				    	 User user=userService.findUserByLoginId(loginId);
 				    	 if(Objects.nonNull(user)) {
-				    		 String tenantId=user.getTenantId();
+				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
 					            if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.TRUE))){
 				            	return ResponseEntity.ok("Task deleted successfully");

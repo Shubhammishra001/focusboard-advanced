@@ -5,10 +5,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.shubham.focusboard.enties.Role;
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.exception.ReqProcessingException;
 import com.shubham.focusboard.repository.UserRepository;
 import com.shubham.focusboard.service.UserService;
+import com.shubham.focusboard.util.ProdConts;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -29,9 +32,16 @@ public class UserServiceImpl implements UserService{
                 throw new ReqProcessingException("Login ID already exists");
             }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            if (user.getIsActive() == null) {
-                user.setIsActive("Y");
+            if (user.getRole() == null) {
+                user.setRole(Role.USER);
             }
+            if (user.getIsActive() == null) {
+                user.setIsActive(ProdConts.TRUE);
+            }
+            if (user.getTenantId() == null) {
+                user.setTenantId(ProdConts.TRUE); // or any default string
+            }
+            
             return userRepository.save(user);
         } catch (Exception e) {
             logger.error("Error in registerUser", e);

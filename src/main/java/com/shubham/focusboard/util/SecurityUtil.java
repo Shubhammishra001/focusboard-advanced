@@ -3,7 +3,6 @@ package com.shubham.focusboard.util;
 import java.util.Objects;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
