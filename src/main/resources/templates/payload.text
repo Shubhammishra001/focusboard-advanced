@@ -1,0 +1,32 @@
+//payload admin
+
+//http://localhost:8080/api/users/register
+{
+  "loginId": "admin1",
+  "password": "userpassadmin",
+  "username": "final admin",
+  "role": "ADMIN",
+  "email": "newadmin@example.com",
+  "tenantId": "6",
+  "active": true
+}
+
+
+
+// {
+//   "loginId": "admin123",
+//   "password": "adminpass",
+//   "username": "Admin",
+//   "role": "ADMIN"
+  
+// }
+
+
+
+----------------for login -http://localhost:8080/api/users/login
+{
+"loginId": "admin1",
+"password": "userpassadmin"
+}
+-------------------------- task create 
+

@@ -2,18 +2,28 @@ package com.shubham.focusboard.dto;
 
 public class TaskDto {
 
-	private Long id;
+	public Long getTaskId() {
+		return taskId;
+	}
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
+	private Long taskId;
     private String title;
     private String description;
     private String dueDate;
     private String status;
     private Long userId;
-	public Long getId() {
-		return id;
+    private String userName;
+    
+    
+	public String getUserName() {
+		return userName;
 	}
-	public void setId(Long id) {
-		this.id = id;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
+
 	public String getTitle() {
 		return title;
 	}

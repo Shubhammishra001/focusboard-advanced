@@ -6,8 +6,14 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,28 +48,22 @@ public class TaskController {
   	    private SecurityUtil securityUtil;
 
     	
-    	@PreAuthorize("hasRole('USER')")
+    	//@PreAuthorize("hasRole('USER','ADMIN')")
 	   @PostMapping("/create")
-	    public ResponseEntity<?> createTask(@RequestBody Task taskReq)throws ReqProcessingException {
-		   try {logger.info("API: createTask with loginId ");
+	    public ResponseEntity<?> createTask(@RequestBody TaskDto taskReq)throws ReqProcessingException {
+		   try {
 	    	User loggedInUser = securityUtil.getLoggedInUser();
 	    	String loginId = loggedInUser.getLoginId();
-	    	//String tenantId = loggedInUser.getTenantId();
-
-			     if(loginId!=null) {
-			    	 User user=userService.findUserByLoginId(loginId);
-			    	 if(Objects.nonNull(user)) {
-			    		 taskReq.setUser(user);
-			    		 String tenantId=user.getTenantId();
-			    		 if(tenantId!=null) {
-			    			 Task savedTask=taskService.createTask(taskReq,tenantId,ProdConts.TRUE);
+	    	String tenantId = loggedInUser.getTenantId();
+	    	logger.info("API: createTask with loginId "+loginId);
+	    	if(tenantId!=null) {
+			    			 Task savedTask=taskService.createTask(loginId,taskReq,tenantId,ProdConts.TRUE);
 			    			 if(savedTask!=null && savedTask.getId()!=null) {
 			    				 logger.info("API: createTask");
 			    				 return ResponseEntity.ok(savedTask);
 			    			 }
 			    		 }
-			    	 }
-			     }
+			    
 		       // return taskService.createTask(task);
 		        return ResponseEntity.badRequest().body(new Task());
 		   }
@@ -212,7 +212,39 @@ public class TaskController {
 				    	 return ResponseEntity.badRequest().body(e.getMessage());
 				    	 }
 	        }
+    	
+    	//pagen ation with search keyword
+    	
+    	@PreAuthorize("hasAnyRole('USER','ADMIN')")
+    	@GetMapping("/search")
+    	public ResponseEntity<?> searchTasks(@RequestParam(required = false)String keyword,
+    			@RequestParam(defaultValue = "0") int page ,@RequestParam(defaultValue = "5")int size)throws ReqProcessingException{
+    		try {
+    			System.err.println(" test 1");
+    	    	User loggedInUser = securityUtil.getLoggedInUser();
+    	    	String loginId = loggedInUser.getLoginId();
+    	    	String tenantId = loggedInUser.getTenantId();
+    	    	logger.info("API: searchTasks with loginId ",loginId);
+    	    	Pageable pageable = PageRequest.of(page, size);
+    	    	Page<TaskDto> taskList=taskService.getTaskListWithPagenation(loginId,pageable,keyword,tenantId ,ProdConts.TRUE);
+    	    	if(!taskList.isEmpty()) {
+    	    		
+    	    		return ResponseEntity.ok(taskList);
+    	    	}
+    	    	return ResponseEntity.noContent().build();
+    			
+    		}catch(Exception e) {
+    	        logger.error("Error in searchTasks", e);
+    	        return ResponseEntity.internalServerError().body("Search failed");
+    			
+    		}
+    	}
+ 
+    	
 	    }
+
+
+
 
 
 

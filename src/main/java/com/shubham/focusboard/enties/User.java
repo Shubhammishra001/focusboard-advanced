@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Column(name = "ISACTIVE")
     private String isActive;
 
-    @Column(name = "login_id", unique = true, nullable = false)
+    @Column(name = "LOGINID", unique = true, nullable = false)
     private String loginId;
 
     // Required by Spring Security

@@ -46,7 +46,6 @@ public class UserController {
 	            String password = loginRequest.get("password");
 
 	            logger.info("Login request for loginId: {}", loginId);
-
 	            User user = userService.authenticateUser(loginId, password);
 
 	            String token = jwtService.generateToken(user);

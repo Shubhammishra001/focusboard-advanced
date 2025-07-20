@@ -1,15 +1,22 @@
 package com.shubham.focusboard.daoImpl;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.shubham.focusboard.dao.TaskDao;
+import com.shubham.focusboard.dto.TaskDto;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.exception.ReqProcessingException;
 import com.shubham.focusboard.repository.TaskRepository;
@@ -56,5 +63,41 @@ public class TaskDaoImpl implements TaskDao{
 	public void deleteById(Long id) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Page<Task> getTaskListWithPagenation(String loginId,Pageable pageable, String keyword, String tenantId, String isActive)
+			throws ReqProcessingException {
+		try {
+			if(Stream.of(tenantId,isActive).noneMatch(Objects::isNull)) {
+			Page<Task> taskList=taskRepository.getTaskListWithPagination(tenantId,isActive,pageable);
+			 if (Objects.nonNull(taskList) && taskList.hasContent()) {
+	                taskList.getContent().forEach(task -> {
+	                });
+	                return taskList;
+			}
+			}
+		}catch(Exception e) {
+			logger.error("Error get all tasks ", e);
+		}
+		return Page.empty();
+	}
+
+	@Override
+	public Page<Task> searchAllTasks(Pageable pageable, String tenantId, String isActive) throws ReqProcessingException {
+		try {
+			if(Stream.of(isActive).noneMatch(Objects::isNull)) {
+				System.err.println(" tasklist "+isActive+"  " +pageable+ " " + tenantId);
+			Page<Task> taskList=taskRepository.searchAllTasks(isActive,pageable,tenantId);
+			 if (Objects.nonNull(taskList) && taskList.hasContent()) {
+	                taskList.getContent().forEach(task -> {
+	                });
+	                return taskList;
+			}
+			}
+		}catch(Exception e) {
+			logger.error("Error get all tasks ", e);
+		}
+		return Page.empty();
 	}
 }

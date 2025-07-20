@@ -1,5 +1,6 @@
 package com.shubham.focusboard.serviceImpl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -8,14 +9,19 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.shubham.focusboard.dao.TaskDao;
 import com.shubham.focusboard.dto.TaskDto;
+import com.shubham.focusboard.enties.Role;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.exception.ReqProcessingException;
+import com.shubham.focusboard.repository.TaskRepository;
 import com.shubham.focusboard.service.TaskService;
 import com.shubham.focusboard.service.UserService;
 import com.shubham.focusboard.util.ProdConts;
@@ -33,21 +39,22 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private UserService userService;
 
-    
-    @Autowired
+     @Autowired
     private PasswordEncoder passwordEncoder;
 
 	@Override
-	public Task createTask(Task taskReq, String tenantId, String isActive) throws ReqProcessingException {
+	public Task createTask(String loginId,TaskDto taskReq, String tenantId, String isActive) throws ReqProcessingException {
 		try {
 			if(Stream.of(taskReq,tenantId,isActive).noneMatch(Objects::isNull)) {
+				User user=userService.findUserByLoginId(loginId);
+				System.err.println(" user "+user);
 				Task task=new Task();
 				task.setDescription(taskReq.getDescription());
 				task.setDueDate(taskReq.getDueDate());
 				task.setIsActive(isActive);
 				task.setTenantId(tenantId);
 				task.setTitle(taskReq.getTitle());
-				task.setUser(taskReq.getUser());
+				task.setUser(user);
 				task.setStatus(taskReq.getStatus());
 				Task savedData=taskDao.Save(task);
 				if(Objects.nonNull(savedData) && savedData.getId()!=null) {
@@ -85,8 +92,8 @@ public class TaskServiceImpl implements TaskService {
 	public Task updateTask(TaskDto updatedTask) throws ReqProcessingException {
 		// TODO Auto-generated method stub
 		try {
-			if(Stream.of(updatedTask.getId()).noneMatch(Objects::isNull)) {
-				Task task=taskDao.findById(updatedTask.getId()).get();
+			if(Stream.of(updatedTask.getTaskId()).noneMatch(Objects::isNull)) {
+				Task task=taskDao.findById(updatedTask.getTaskId()).get();
 				User user=userService.findUserByUserId(updatedTask.getUserId());
 				if(Objects.nonNull(task)&& task.getId()!=null && Objects.nonNull(user) && user.getId()!=null) {
 					task.setIsActive(ProdConts.TRUE);
@@ -137,4 +144,45 @@ public class TaskServiceImpl implements TaskService {
 		}
 		return new Task();
 	}
+
+	@Override
+	public Page<TaskDto> getTaskListWithPagenation(String loginId,Pageable pageable, String keyword, String tenantId, String isActive)
+			throws ReqProcessingException {
+		try {
+			if(Stream.of(tenantId,isActive).noneMatch(Objects::isNull)) {
+				User user=userService.findUserByLoginId(loginId);
+				Page<Task> taskList=null;
+				if(user.getRole()==Role.ADMIN) {
+					taskList=taskDao.searchAllTasks(pageable,tenantId,isActive);
+				}
+				else if(user.getRole()==Role.USER) {
+					taskList=taskDao.getTaskListWithPagenation(loginId,pageable,keyword,tenantId,isActive);
+				}
+		//	Page<Task> taskList=taskDao.getTaskListWithPagenation(loginId,pageable,keyword,tenantId,isActive);
+			if(Objects.nonNull(taskList)) {
+				List<TaskDto> dtoList=taskList.getContent().stream().map(this::toDTO).toList();
+				return new PageImpl<>(dtoList,pageable,taskList.getTotalElements());
+			}
+			}
+		}
+	catch(Exception e) {
+		logger.error("Error get all tasks ", e);
+	}
+	return Page.empty();
+   }
+	
+	
+	public  TaskDto toDTO(Task entity) {
+		System.err.print(" test "+entity);
+	    TaskDto dto = new TaskDto();
+	    dto.setTaskId(entity.getId());
+	    dto.setTitle(entity.getTitle());
+	    dto.setDescription(entity.getDescription());
+	    dto.setDueDate(entity.getDueDate() != null ? entity.getDueDate().toString() : null);
+	    dto.setStatus(entity.getStatus());
+	    dto.setUserId(entity.getUser().getId());
+	    dto.setUserName(entity.getUser().getUsername()); // <-- Correct usage
+	    return dto;
+	}
+
 }
