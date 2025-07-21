@@ -1,5 +1,7 @@
 package com.shubham.focusboard.dto;
 
+import java.time.LocalDate;
+
 public class TaskDto {
 
 	public Long getTaskId() {
@@ -11,7 +13,7 @@ public class TaskDto {
 	private Long taskId;
     private String title;
     private String description;
-    private String dueDate;
+    private LocalDate dueDate;
     private String status;
     private Long userId;
     private String userName;
@@ -36,10 +38,11 @@ public class TaskDto {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getDueDate() {
+	
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
-	public void setDueDate(String dueDate) {
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
 	public String getStatus() {

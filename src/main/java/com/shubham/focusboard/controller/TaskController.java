@@ -220,7 +220,6 @@ public class TaskController {
     	public ResponseEntity<?> searchTasks(@RequestParam(required = false)String keyword,
     			@RequestParam(defaultValue = "0") int page ,@RequestParam(defaultValue = "5")int size)throws ReqProcessingException{
     		try {
-    			System.err.println(" test 1");
     	    	User loggedInUser = securityUtil.getLoggedInUser();
     	    	String loginId = loggedInUser.getLoginId();
     	    	String tenantId = loggedInUser.getTenantId();
@@ -240,8 +239,7 @@ public class TaskController {
     		}
     	}
  
-    	
-	    }
+}
 
 
 

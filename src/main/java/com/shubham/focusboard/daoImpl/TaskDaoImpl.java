@@ -87,7 +87,6 @@ public class TaskDaoImpl implements TaskDao{
 	public Page<Task> searchAllTasks(Pageable pageable, String tenantId, String isActive) throws ReqProcessingException {
 		try {
 			if(Stream.of(isActive).noneMatch(Objects::isNull)) {
-				System.err.println(" tasklist "+isActive+"  " +pageable+ " " + tenantId);
 			Page<Task> taskList=taskRepository.searchAllTasks(isActive,pageable,tenantId);
 			 if (Objects.nonNull(taskList) && taskList.hasContent()) {
 	                taskList.getContent().forEach(task -> {

@@ -1,6 +1,5 @@
 package com.shubham.focusboard.serviceImpl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +20,6 @@ import com.shubham.focusboard.enties.Role;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.exception.ReqProcessingException;
-import com.shubham.focusboard.repository.TaskRepository;
 import com.shubham.focusboard.service.TaskService;
 import com.shubham.focusboard.service.UserService;
 import com.shubham.focusboard.util.ProdConts;
@@ -178,7 +176,7 @@ public class TaskServiceImpl implements TaskService {
 	    dto.setTaskId(entity.getId());
 	    dto.setTitle(entity.getTitle());
 	    dto.setDescription(entity.getDescription());
-	    dto.setDueDate(entity.getDueDate() != null ? entity.getDueDate().toString() : null);
+	    dto.setDueDate(entity.getDueDate());
 	    dto.setStatus(entity.getStatus());
 	    dto.setUserId(entity.getUser().getId());
 	    dto.setUserName(entity.getUser().getUsername()); // <-- Correct usage

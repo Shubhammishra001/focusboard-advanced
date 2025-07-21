@@ -1,5 +1,7 @@
 package com.shubham.focusboard.enties;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,7 +25,7 @@ public class Task {
     private String description;
 
     @Column(name = "DUEDATE")
-    private String dueDate;
+    private LocalDate dueDate;
 
     @Column(name = "STATUS")
     private String status;
@@ -38,7 +40,16 @@ public class Task {
     @JoinColumn(name = "USERID")
     private User user;
 
-    public Task() {
+    @Column(name = "EMAILREMINDERS")
+    private boolean emailReminders = true;  // default value is true
+    
+    public boolean isEmailReminders() {
+		return emailReminders;
+	}
+	public void setEmailReminders(boolean emailReminders) {
+		this.emailReminders = emailReminders;
+	}
+	public Task() {
     	
     }
 	public Long getId() {
@@ -65,14 +76,13 @@ public class Task {
 		this.description = description;
 	}
 
-	public String getDueDate() {
+
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
-
-	public void setDueDate(String dueDate) {
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
-
 	public String getStatus() {
 		return status;
 	}
@@ -111,7 +121,7 @@ public class Task {
 				+ ", status=" + status + ", tenantId=" + tenantId + ", isActive=" + isActive + ", user=" + user + "]";
 	}
 
-	public Task(Long id, String title, String description, String dueDate, String status, String tenantId,
+	public Task(Long id, String title, String description, LocalDate dueDate, String status, String tenantId,
 			String isActive, User user) {
 		super();
 		this.id = id;
