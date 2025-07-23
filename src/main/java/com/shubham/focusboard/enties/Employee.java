@@ -1,6 +1,7 @@
 package com.shubham.focusboard.enties;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -48,4 +49,125 @@ public class Employee {
     @Column(name = "employee_photo")
     private byte[] employeePhoto;
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public PersonalDetails getPersonalDetails() {
+		return personalDetails;
+	}
+
+	public void setPersonalDetails(PersonalDetails personalDetails) {
+		this.personalDetails = personalDetails;
+	}
+
+	public ProfessionalDetails getProfessionalDetails() {
+		return professionalDetails;
+	}
+
+	public void setProfessionalDetails(ProfessionalDetails professionalDetails) {
+		this.professionalDetails = professionalDetails;
+	}
+
+	public BankDetails getBankDetails() {
+		return bankDetails;
+	}
+
+	public void setBankDetails(BankDetails bankDetails) {
+		this.bankDetails = bankDetails;
+	}
+
+	public List<AcademicDetail> getAcademicDetails() {
+		return academicDetails;
+	}
+
+	public void setAcademicDetails(List<AcademicDetail> academicDetails) {
+		this.academicDetails = academicDetails;
+	}
+
+	public String getTenantId() {
+		return tenantId;
+	}
+
+	public void setTenantId(String tenantId) {
+		this.tenantId = tenantId;
+	}
+
+	public String getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(String isActive) {
+		this.isActive = isActive;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public String getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(String createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public byte[] getEmployeePhoto() {
+		return employeePhoto;
+	}
+
+	public void setEmployeePhoto(byte[] employeePhoto) {
+		this.employeePhoto = employeePhoto;
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", personalDetails=" + personalDetails + ", professionalDetails="
+				+ professionalDetails + ", bankDetails=" + bankDetails + ", academicDetails=" + academicDetails
+				+ ", tenantId=" + tenantId + ", isActive=" + isActive + ", createdBy=" + createdBy + ", createdDate="
+				+ createdDate + ", status=" + status + ", employeePhoto=" + Arrays.toString(employeePhoto) + "]";
+	}
+
+	public Employee(Long id, PersonalDetails personalDetails, ProfessionalDetails professionalDetails,
+			BankDetails bankDetails, List<AcademicDetail> academicDetails, String tenantId, String isActive,
+			String createdBy, String createdDate, String status, byte[] employeePhoto) {
+		super();
+		this.id = id;
+		this.personalDetails = personalDetails;
+		this.professionalDetails = professionalDetails;
+		this.bankDetails = bankDetails;
+		this.academicDetails = academicDetails;
+		this.tenantId = tenantId;
+		this.isActive = isActive;
+		this.createdBy = createdBy;
+		this.createdDate = createdDate;
+		this.status = status;
+		this.employeePhoto = employeePhoto;
+	}
+
+	public Employee() {
+		
+	}
+
+    
+    
+    
+    
 }
