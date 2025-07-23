@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shubham.focusboard.dto.TaskDto;
+import com.shubham.focusboard.enties.AuditLog;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.exception.ReqProcessingException;
+import com.shubham.focusboard.service.AuditLogService;
 import com.shubham.focusboard.service.TaskService;
 import com.shubham.focusboard.service.UserService;
 import com.shubham.focusboard.util.ProdConts;
@@ -47,6 +49,7 @@ public class TaskController {
     	@Autowired
   	    private SecurityUtil securityUtil;
 
+    	@Autowired private AuditLogService auditLogService;
     	
     	//@PreAuthorize("hasRole('USER','ADMIN')")
 	   @PostMapping("/create")
@@ -60,6 +63,7 @@ public class TaskController {
 			    			 Task savedTask=taskService.createTask(loginId,taskReq,tenantId,ProdConts.TRUE);
 			    			 if(savedTask!=null && savedTask.getId()!=null) {
 			    				 logger.info("API: createTask");
+			    				 auditLogService.logAction(savedTask.getId(), "CREATED",loginId);
 			    				 return ResponseEntity.ok(savedTask);
 			    			 }
 			    		 }
@@ -70,7 +74,7 @@ public class TaskController {
 		   catch(Exception e) {
 			   logger.error("Error fetching tasks", e);
 		   }
-		   return ResponseEntity.internalServerError().build();
+			   return ResponseEntity.internalServerError().build();
 	    }
 	  //get Task By Id
     	//@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
@@ -90,7 +94,8 @@ public class TaskController {
 			    		 if(tenantId!=null) {
 						   Task task=taskService.getTaskById(id);
 						   if(Objects.nonNull(task)) {
-						   return ResponseEntity.ok(task);
+							   auditLogService.logAction(task.getId(), "get By Id Task", user.getLoginId());
+						       return ResponseEntity.ok(task);
 						   }
 			    		 }
 			    	 }
@@ -147,7 +152,8 @@ public class TaskController {
 				    		 if(tenantId!=null) {
 					            Task task = taskService.updateTask(updatedTask);
 						            if(Objects.nonNull(task) && task.getId()!=null) {
-						            	return ResponseEntity.ok(task);
+										   auditLogService.logAction(task.getId(), "update Task", user.getLoginId());
+						            	   return ResponseEntity.ok(task);
 					            }
 				            }
 				    	 }
@@ -174,6 +180,7 @@ public class TaskController {
 				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
 				    			 if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.FALSE))){
+				  				   auditLogService.logAction(id, "deactivate Task", user.getLoginId());
 				    				 return ResponseEntity.ok("Task deleted successfully");
 				    				 }
 				    			 }
@@ -201,7 +208,8 @@ public class TaskController {
 				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
 					            if(Boolean.TRUE.equals(taskService.deleteTaskOrActivateTask(id,ProdConts.TRUE))){
-				            	return ResponseEntity.ok("Task deleted successfully");
+					            	  auditLogService.logAction(id, "activate Task", user.getLoginId());
+					                	return ResponseEntity.ok("Task deleted successfully");
 				            	}
 					            }
 				    		 }
