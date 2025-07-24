@@ -24,6 +24,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/users/**").permitAll()
+                
                 .anyRequest().authenticated()
             ) .exceptionHandling(ex -> ex
                     .authenticationEntryPoint(authenticationEntryPoint)  // 401
