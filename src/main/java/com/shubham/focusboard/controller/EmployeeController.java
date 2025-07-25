@@ -17,7 +17,7 @@ import com.shubham.focusboard.service.EmployeeService;
 import com.shubham.focusboard.util.SecurityUtil;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/api/employee")
 public class EmployeeController {
 	 private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 	 
@@ -28,6 +28,7 @@ public class EmployeeController {
 	 @PostMapping("/create")
 	    public ResponseEntity<?> createEmployee(@RequestBody EmployeeDto employeeReq) throws ReqProcessingException {
 	        try {
+	        	System.err.println(" test create ");
 	            User loggedInUser = securityUtil.getLoggedInUser();
 	            String loginId = loggedInUser.getLoginId();
 	            String tenantId = loggedInUser.getTenantId();

@@ -44,53 +44,66 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private AcademicDetailService academicDetailService;
 
-	@Override
-	public EmployeeDto createEmployee(EmployeeDto dto) throws ReqProcessingException {
-		try {
-			// 1. Save personal details
-	        PersonalDetails personal = personalDetailsService.createPersonalDetail(dto.getPersonalDetails());
+    @Override
+    public EmployeeDto createEmployee(EmployeeDto dto) throws ReqProcessingException {
+        try {
+            logger.info("Creating employee for: {}", dto.getPersonalDetails().getFullName());
 
-	        // 2. Save professional details
-	        ProfessionalDetails professional = professionalDetailsService.createProfessionalDetails(dto.getProfessionalDetails());
+            // 1. Save personal details
+            PersonalDetails personal = personalDetailsService.createPersonalDetail(dto.getPersonalDetails());
 
-	        // 3. Save bank details
-	        BankDetails bank = bankDetailsService.createBankDetails(dto.getBankDetails());
+            // 2. Save professional details
+            ProfessionalDetails professional = professionalDetailsService.createProfessionalDetails(dto.getProfessionalDetails());
 
-	        // 4. Save employee with references
-	        Employee employee = new Employee();
-	        employee.setPersonalDetails(personal);
-	        employee.setProfessionalDetails(professional);
-	        employee.setBankDetails(bank);
-	        employee.setTenantId(dto.getTenantId());
-	        employee.setIsActive(dto.getIsActive());
-	        employee.setCreatedBy(dto.getCreatedBy());
-	        employee.setCreatedDate(dto.getCreatedDate());
-	        employee.setStatus(dto.getStatus());
-	        employee.setEmployeePhoto(dto.getEmployeePhoto());
+            // 3. Save bank details
+            BankDetails bank = bankDetailsService.createBankDetails(dto.getBankDetails());
 
-	        // Save employee first to assign ID (for FK in academic details)
-	        Employee savedEmployee = employeeDao.save(employee);
+            // 4. Build base employee entity
+            Employee employee = new Employee();
+            employee.setPersonalDetails(personal);
+            employee.setProfessionalDetails(professional);
+            employee.setBankDetails(bank);
+            employee.setTenantId(dto.getTenantId());
+            employee.setIsActive(dto.getIsActive());
+            employee.setCreatedBy(dto.getCreatedBy());
+            employee.setCreatedDate(dto.getCreatedDate());
+            employee.setStatus(dto.getStatus());
+            employee.setEmployeePhoto(dto.getEmployeePhoto());
 
-	        Long empId=savedEmployee.getId();
-	        // 5. Save academic details with employee reference
-	        List<AcademicDetail> academicEntities = dto.getAcademicDetails().stream().map(detailDTO -> {
-	            detailDTO.setEmployeeId(empId);
-	            return academicDetailService.createAcademicDetail(detailDTO);
-	        }).toList();
+            // 5. Save employee first to generate ID
+            Employee savedEmployee = employeeDao.save(employee);
+            Long empId = savedEmployee.getId();
 
-	        // 6. Set academicDetails on saved employee and re-save
-	        savedEmployee.setAcademicDetails(academicEntities);
-	        savedEmployee = employeeDao.save(savedEmployee);
+            // 6. Create and save academic details
+            List<AcademicDetail> academicEntities = dto.getAcademicDetails().stream()
+                    .map(detailDTO -> {
+                        detailDTO.setEmployeeId(empId);
+                        return academicDetailService.createAcademicDetail(detailDTO);
+                    })
+                    .collect(Collectors.toList()); // ✅ mutable list
 
-	        return mapToDTO(savedEmployee);
-			
-		}catch(Exception e) {
-			logger.error("Error fetching tasks", e);
-		}
-		return new EmployeeDto();
-	}
-	
-	private EmployeeDto mapToDTO(Employee employee) {
+            // 7. Fix orphanRemoval issue: update collection safely
+            if (savedEmployee.getAcademicDetails() != null) {
+                savedEmployee.getAcademicDetails().clear(); // ✅ Hibernate can track changes
+                savedEmployee.getAcademicDetails().addAll(academicEntities);
+            } else {
+                savedEmployee.setAcademicDetails(academicEntities);
+            }
+
+            // 8. Save updated employee with academic details
+            savedEmployee = employeeDao.save(savedEmployee);
+
+            logger.info("Employee created with ID: {}", savedEmployee.getId());
+
+            return mapToDTO(savedEmployee);
+
+        } catch (Exception e) {
+            logger.error("Error creating employee", e);
+            throw new ReqProcessingException("Failed to create employee", e);
+        }
+    }
+
+    private EmployeeDto mapToDTO(Employee employee) {
         EmployeeDto dto = new EmployeeDto();
         dto.setId(employee.getId());
         dto.setTenantId(employee.getTenantId());
@@ -104,11 +117,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         dto.setProfessionalDetails(professionalDetailsService.toDTO(employee.getProfessionalDetails()));
         dto.setBankDetails(bankDetailsService.toDTO(employee.getBankDetails()));
 
-        List<AcademicDetailsDto> academicDetailDTOs = employee.getAcademicDetails().stream()
-                .map(academicDetailService::toDTO)
-                .collect(Collectors.toList());
-        dto.setAcademicDetails(academicDetailDTOs);
+        if (employee.getAcademicDetails() != null) {
+            List<AcademicDetailsDto> academicDetailDTOs = employee.getAcademicDetails().stream()
+                    .map(academicDetailService::toDTO)
+                    .collect(Collectors.toList());
+            dto.setAcademicDetails(academicDetailDTOs);
+        }
+
         return dto;
     }
-
 }
