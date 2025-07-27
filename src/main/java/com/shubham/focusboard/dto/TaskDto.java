@@ -3,13 +3,7 @@ package com.shubham.focusboard.dto;
 import java.time.LocalDate;
 
 public class TaskDto {
-
-	public Long getTaskId() {
-		return taskId;
-	}
-	public void setTaskId(Long taskId) {
-		this.taskId = taskId;
-	}
+    private Long employeeId;
 	private Long taskId;
     private String title;
     private String description;
@@ -17,7 +11,27 @@ public class TaskDto {
     private String status;
     private Long userId;
     private String userName;
+    private String EmployeeName;
     
+	public String getEmployeeName() {
+		return EmployeeName;
+	}
+	public void setEmployeeName(String employeeName) {
+		EmployeeName = employeeName;
+	}
+	public Long getEmployeeId() {
+		return employeeId;
+	}
+	public void setEmployeeId(Long employeeId) {
+		this.employeeId = employeeId;
+	}
+	public Long getTaskId() {
+		return taskId;
+	}
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
+
     
 	public String getUserName() {
 		return userName;

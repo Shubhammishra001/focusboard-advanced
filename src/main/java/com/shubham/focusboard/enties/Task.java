@@ -40,6 +40,10 @@ public class Task {
     @JoinColumn(name = "USERID")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;  // assigned employee
+    
     @Column(name = "EMAILREMINDERS")
     private boolean emailReminders = true;  // default value is true
     
@@ -132,6 +136,26 @@ public class Task {
 		this.tenantId = tenantId;
 		this.isActive = isActive;
 		this.user = user;
+	}
+	public Employee getEmployee() {
+		return employee;
+	}
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	public Task(Long id, String title, String description, LocalDate dueDate, String status, String tenantId,
+			String isActive, User user, Employee employee, boolean emailReminders) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.description = description;
+		this.dueDate = dueDate;
+		this.status = status;
+		this.tenantId = tenantId;
+		this.isActive = isActive;
+		this.user = user;
+		this.employee = employee;
+		this.emailReminders = emailReminders;
 	}
     
     

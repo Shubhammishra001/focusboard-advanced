@@ -1,5 +1,6 @@
 package com.shubham.focusboard.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +44,7 @@ public class TaskController {
     	private UserService userService;
     	
     	@Autowired
+    	
   	    private SecurityUtil securityUtil;
 
     	@Autowired private AuditLogService auditLogService;
@@ -103,10 +105,11 @@ public class TaskController {
 		   }
 	   }
     	
-    	@PreAuthorize("hasRole('ADMIN')")
+    	//@PreAuthorize("hasRole('ADMIN')")
 	    @GetMapping("/all")
-	    public ResponseEntity<?> getAllTasks() throws ReqProcessingException {
-	        try { 
+	    public ResponseEntity<List<TaskDto>> getAllTasks() throws ReqProcessingException {
+	    	
+	        try { List<TaskDto> tasks=new ArrayList<TaskDto>();
 	        	User loggedInUser = securityUtil.getLoggedInUser();
 	        	String loginId = loggedInUser.getLoginId();
 	        	String tenantId = loggedInUser.getTenantId();
@@ -117,17 +120,18 @@ public class TaskController {
 				    	 if(Objects.nonNull(user)) {
 				    		  tenantId=user.getTenantId();
 				    		 if(tenantId!=null) {
-					            List<Task> tasks = taskService.getAllTasks();
+					             tasks = taskService.getAllTasks();
 					            if(Objects.nonNull(tasks)) {
 					            	return ResponseEntity.ok(tasks);
 					            }
 				    		 }
 				    	 }
 				     }
-	            return ResponseEntity.badRequest().body(new Task());
+	            return ResponseEntity.badRequest().body(tasks);
 	        } catch (Exception e) {
 	            logger.error("Error fetching tasks", e);
-	            return ResponseEntity.badRequest().body(e.getMessage());
+	            return ResponseEntity.internalServerError().body(null);
+	           
 	        }
 	    }
 	   

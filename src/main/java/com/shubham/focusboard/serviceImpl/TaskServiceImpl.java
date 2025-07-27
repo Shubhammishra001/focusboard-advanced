@@ -1,5 +1,6 @@
 package com.shubham.focusboard.serviceImpl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -16,10 +17,12 @@ import org.springframework.stereotype.Service;
 
 import com.shubham.focusboard.dao.TaskDao;
 import com.shubham.focusboard.dto.TaskDto;
+import com.shubham.focusboard.enties.Employee;
 import com.shubham.focusboard.enties.Role;
 import com.shubham.focusboard.enties.Task;
 import com.shubham.focusboard.enties.User;
 import com.shubham.focusboard.exception.ReqProcessingException;
+import com.shubham.focusboard.repository.EmployeeRepository;
 import com.shubham.focusboard.service.TaskService;
 import com.shubham.focusboard.service.UserService;
 import com.shubham.focusboard.util.ProdConts;
@@ -39,14 +42,17 @@ public class TaskServiceImpl implements TaskService {
 
      @Autowired
     private PasswordEncoder passwordEncoder;
+     
+     @Autowired private EmployeeRepository employeeRepository;
 
 	@Override
 	public Task createTask(String loginId,TaskDto taskReq, String tenantId, String isActive) throws ReqProcessingException {
 		try {
 			if(Stream.of(taskReq,tenantId,isActive).noneMatch(Objects::isNull)) {
 				User user=userService.findUserByLoginId(loginId);
-				System.err.println(" user "+user);
+				Employee assignedEmployee = employeeRepository.findById(taskReq.getEmployeeId()).get();
 				Task task=new Task();
+				task.setEmployee(assignedEmployee);
 				task.setDescription(taskReq.getDescription());
 				task.setDueDate(taskReq.getDueDate());
 				task.setIsActive(isActive);
@@ -114,19 +120,42 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public List<Task> getAllTasks() throws ReqProcessingException {
-		try {
-				List<Task> taskList=taskDao.findAll();
-				logger.warn(" taskList ",taskList);
-				if(Objects.nonNull(taskList)) {
-					return taskList;
-				}
-				}
-		catch(Exception e) {
-			logger.error("Error get all tasks ", e);
-		}
-		return Collections.emptyList();
+	public List<TaskDto> getAllTasks() throws ReqProcessingException {
+	    try {
+	        List<Task> taskList = taskDao.findAll();
+	        logger.warn("taskList: {}", taskList);
+
+	        if (Objects.nonNull(taskList)) {
+	            List<TaskDto> taskDtos = new ArrayList<>();
+	            for (Task task : taskList) {
+	                TaskDto dto = new TaskDto();
+	                dto.setTaskId(task.getId());
+	                dto.setTitle(task.getTitle());
+	                dto.setDescription(task.getDescription());
+	                dto.setDueDate(task.getDueDate());
+	                dto.setStatus(task.getStatus());
+
+	                if (task.getUser() != null) {
+	                    dto.setUserId(task.getUser().getId());
+	                    dto.setUserName(task.getUser().getUsername());
+	                }
+
+	                if (task.getEmployee() != null) {
+	                    dto.setEmployeeId(task.getEmployee().getId());
+	                    dto.setEmployeeName(task.getEmployee().getPersonalDetails().getFullName());
+	                }
+
+	                taskDtos.add(dto);
+	            }
+	            return taskDtos;
+	        }
+	    } catch (Exception e) {
+	        logger.error("Error in getAllTasks", e);
+	    }
+
+	    return Collections.emptyList();
 	}
+
 
 	@Override
 	public Task getTaskById(Long id) throws ReqProcessingException {
@@ -180,6 +209,10 @@ public class TaskServiceImpl implements TaskService {
 	    dto.setStatus(entity.getStatus());
 	    dto.setUserId(entity.getUser().getId());
 	    dto.setUserName(entity.getUser().getUsername()); // <-- Correct usage
+	    dto.setEmployeeId(entity.getEmployee().getId());
+	    
+	    dto.setEmployeeId(entity.getEmployee() != null ? entity.getEmployee().getId() : 0);
+	    dto.setEmployeeName(entity.getEmployee().getPersonalDetails().getFullName()!=null?entity.getEmployee().getPersonalDetails().getFullName():"--");
 	    return dto;
 	}
 

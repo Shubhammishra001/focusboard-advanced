@@ -19,7 +19,7 @@ public interface TaskService {
 
   public Task updateTask(TaskDto updatedTask)throws ReqProcessingException;
 
-  public List<Task> getAllTasks()throws ReqProcessingException;
+  public List<TaskDto> getAllTasks()throws ReqProcessingException;
 
   public Task getTaskById(Long id)throws ReqProcessingException;
 

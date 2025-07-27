@@ -24,6 +24,7 @@ import com.shubham.focusboard.service.BankDetailsService;
 import com.shubham.focusboard.service.EmployeeService;
 import com.shubham.focusboard.service.PersonalDetailsService;
 import com.shubham.focusboard.service.ProfessionalDetailsService;
+import com.shubham.focusboard.util.ProdConts;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -126,4 +127,19 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return dto;
     }
+
+	@Override
+	public List<Employee> getAllEmployees() throws ReqProcessingException {
+		// TODO Auto-generated method stub
+		return employeeDao.findAll(ProdConts.TRUE);
+	}
 }
+
+
+
+
+
+
+
+
+
